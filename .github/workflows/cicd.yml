@@ -1,0 +1,43 @@
+name: Deploy DAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target Environment
+        required: true
+        type: choice
+        options:
+          - sales
+          - default
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Configure Sales Credentials
+        if: github.event.inputs.environment == 'sales'
+        run: |
+          echo "DATABRICKS_HOST=${{ secrets.SALES_DATABRICKS_HOST }}" >> $GITHUB_ENV
+          echo "DATABRICKS_CLIENT_ID=${{ secrets.SALES_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "DATABRICKS_CLIENT_SECRET=${{ secrets.SALES_CLIENT_SECRET }}" >> $GITHUB_ENV
+
+      - name: Configure Default Credentials
+        if: github.event.inputs.environment == 'default'
+        run: |
+          echo "DATABRICKS_HOST=${{ secrets.DEFAULT_DATABRICKS_HOST }}" >> $GITHUB_ENV
+          echo "DATABRICKS_CLIENT_ID=${{ secrets.DEFAULT_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "DATABRICKS_CLIENT_SECRET=${{ secrets.DEFAULT_CLIENT_SECRET }}" >> $GITHUB_ENV
+
+      - name: Validate Bundle
+        run: |
+          databricks bundle validate -t ${{ github.event.inputs.environment }}
+
+      - name: Deploy Bundle
+        run: |
+          databricks bundle deploy -t ${{ github.event.inputs.environment }}
