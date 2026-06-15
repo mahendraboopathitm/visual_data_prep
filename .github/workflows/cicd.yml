@@ -28,22 +28,6 @@ jobs:
         run: |
           databricks bundle validate -t Sales
 
-      #################################################
-      # Test Authentication in Default Workspace
-      #################################################
-
-      - name: Verify Default Authentication
-        env:
-          DATABRICKS_HOST: ${{ secrets.DEFAULT_DATABRICKS_HOST }}
-          DATABRICKS_CLIENT_ID: ${{ secrets.DEFAULT_CLIENT_ID }}
-          DATABRICKS_CLIENT_SECRET: ${{ secrets.DEFAULT_CLIENT_SECRET }}
-        run: |
-          databricks bundle validate -t default
-
-      #################################################
-      # Deploy to Default Workspace
-      #################################################
-
       - name: Deploy Bundle to Default
         env:
           DATABRICKS_HOST: ${{ secrets.DEFAULT_DATABRICKS_HOST }}
