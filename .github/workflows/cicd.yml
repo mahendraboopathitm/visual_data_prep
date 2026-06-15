@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
+
 jobs:
-  deploy:
+  validate-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -13,24 +14,20 @@ jobs:
 
       - uses: databricks/setup-cli@main
 
-      - name: Configure Sales Credentials
-        if: github.event.inputs.environment == 'sales'
+      # Validate against Sales
+      - name: Validate Bundle in Sales
+        env:
+          DATABRICKS_HOST: ${{ secrets.SALES_DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.SALES_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.SALES_CLIENT_SECRET }}
         run: |
-          echo "DATABRICKS_HOST=${{ secrets.SALES_DATABRICKS_HOST }}" >> $GITHUB_ENV
-          echo "DATABRICKS_CLIENT_ID=${{ secrets.SALES_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "DATABRICKS_CLIENT_SECRET=${{ secrets.SALES_CLIENT_SECRET }}" >> $GITHUB_ENV
+          databricks bundle validate -t Sales
 
-      - name: Configure Default Credentials
-        if: github.event.inputs.environment == 'default'
+      # Deploy to Default
+      - name: Deploy Bundle to Default
+        env:
+          DATABRICKS_HOST: ${{ secrets.DEFAULT_DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DEFAULT_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DEFAULT_CLIENT_SECRET }}
         run: |
-          echo "DATABRICKS_HOST=${{ secrets.DEFAULT_DATABRICKS_HOST }}" >> $GITHUB_ENV
-          echo "DATABRICKS_CLIENT_ID=${{ secrets.DEFAULT_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "DATABRICKS_CLIENT_SECRET=${{ secrets.DEFAULT_CLIENT_SECRET }}" >> $GITHUB_ENV
-
-      - name: Validate Bundle
-        run: |
-          databricks bundle validate -t ${{ github.event.inputs.environment }}
-
-      - name: Deploy Bundle
-        run: |
-          databricks bundle deploy -t ${{ github.event.inputs.environment }}
+          databricks bundle deploy -t default
