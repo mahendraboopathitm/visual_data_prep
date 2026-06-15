@@ -1,0 +1,14 @@
+bundle:
+  name: visual-data-prep
+
+include:
+  - resources/*.yml
+
+targets:
+  Sales:
+    workspace:
+      host: https://dbc-2bffc3bd-8df7.cloud.databricks.com
+
+  default:
+    workspace:
+      host: https://dbc-ce0ce842-10b5.cloud.databricks.com

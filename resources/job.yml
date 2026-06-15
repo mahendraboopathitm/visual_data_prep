@@ -1,0 +1,17 @@
+resources:
+  jobs:
+    Visual_data_prep:
+      name: Visual data prep
+
+      schedule:
+        quartz_cron_expression: "0 0/15 * * * ?"
+        timezone_id: "Asia/Calcutta"
+        pause_status: "UNPAUSED"
+
+      tasks:
+        - task_key: Visual_data_prep
+          notebook_task:
+            notebook_path: ../src/Visual data prep.designer.ipynb
+
+      queue:
+        enabled: true
