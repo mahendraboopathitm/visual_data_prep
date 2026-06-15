@@ -10,11 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: databricks/setup-cli@main
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
 
-      # Validate against Sales
+      #################################################
+      # Validate in Sales Workspace
+      #################################################
+
       - name: Validate Bundle in Sales
         env:
           DATABRICKS_HOST: ${{ secrets.SALES_DATABRICKS_HOST }}
@@ -23,7 +28,22 @@ jobs:
         run: |
           databricks bundle validate -t Sales
 
-      # Deploy to Default
+      #################################################
+      # Test Authentication in Default Workspace
+      #################################################
+
+      - name: Verify Default Authentication
+        env:
+          DATABRICKS_HOST: ${{ secrets.DEFAULT_DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DEFAULT_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DEFAULT_CLIENT_SECRET }}
+        run: |
+          databricks current-user me
+
+      #################################################
+      # Deploy to Default Workspace
+      #################################################
+
       - name: Deploy Bundle to Default
         env:
           DATABRICKS_HOST: ${{ secrets.DEFAULT_DATABRICKS_HOST }}
